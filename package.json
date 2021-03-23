@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "Create Kubernetes port-forward groups and run them at once",
   "main": "index.js",
+  "bin": {
+    "mpf": "bin/mpf"
+  },
   "scripts": {
     "test": "jest"
   },
