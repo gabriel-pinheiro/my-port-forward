@@ -1,10 +1,10 @@
 {
   "name": "my-port-forward",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Create Kubernetes port-forward groups and run them at once",
   "main": "index.js",
   "bin": {
-    "mpf": "bin/mpf"
+    "mpf": "bin/mpf.js"
   },
   "scripts": {
     "test": "jest"

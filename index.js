@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 require('colors');
 const { getKubeVersion, getNamespaces, getServices, portForward } = require('./kube');
 const { Command } = require('commander');
