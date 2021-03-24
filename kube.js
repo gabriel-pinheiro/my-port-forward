@@ -32,10 +32,8 @@ async function getServices(namespace) {
     return output.items.map(n => n.metadata.name);
 }
 
-async function portForward({ namespace, service, localPort, targetPort }) {
-    const cmd = spawn(KUBECTL, `port-forward -n=${namespace} svc/${service} ${localPort}:${targetPort}`.split(' '));
-    cmd.on('error', () => exitWithError(`Port forward on ${namespace}/${service} failed`));
-    cmd.on('exit', () => exitWithError(`Port forward on ${namespace}/${service} failed`));
+function portForward({ namespace, service, localPort, targetPort }) {
+    return spawn(KUBECTL, `port-forward -n=${namespace} svc/${service} ${localPort}:${targetPort}`.split(' '));
 }
 
 module.exports = { getKubeVersion, getNamespaces, getServices, portForward };

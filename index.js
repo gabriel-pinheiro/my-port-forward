@@ -1,11 +1,12 @@
 require('colors');
-const { getKubeVersion, getNamespaces, getServices, portForward } = require('./kube');
+const { getKubeVersion, getNamespaces, getServices } = require('./kube');
 const { Command } = require('commander');
 const ora = require('ora');
 const pkg = require('./package.json');
 const { promptNamespace, promptService, promptPort, promptNext } = require('./prompt');
 const { setGroups, getGroups } = require('./fs');
 const { exitWithError } = require('./utils');
+const { PortForward } = require('./port-forward');
 
 async function init() {
     const KUBE_VERSION = await getKubeVersion();
@@ -46,10 +47,24 @@ async function init() {
             exitWithError(`Oops, the group ${name.red} doesn't exist`);
         }
 
-        group.forEach(f => portForward(f));
-        ora({
+        const spinner = ora({
             color: 'green',
-            text: `Listening on ports ${group.map(g => g.localPort).join(', ')}`,
+            text: 'Creating tunnels',
+        }).start();
+        const forwards = group.map(g => new PortForward(g))
+        const successMessage = `Listening on ports ${forwards.map(f => f.localPort).join(', ')}`;
+
+        forwards.forEach(f => f.registerMessageEvents(successMessage.length));
+        forwards.forEach(f => f.on('exit', () => {
+            forwards.forEach(f2 => f2.kill());
+            process.exit(1);
+        }));
+
+        await Promise.all(forwards.map(f => f.start()));
+        spinner.stop();
+
+        ora({
+            text: successMessage,
             spinner: 'monkey',
         }).start();
     });
