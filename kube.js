@@ -32,8 +32,15 @@ async function getServices(namespace) {
     return output.items.map(n => n.metadata.name);
 }
 
+async function getPorts(namespace, service) {
+    const cmd = spawn(KUBECTL, `-n=${namespace} get svc ${service} -ojson`.split(' '));
+    const output = JSON.parse(await streamToString(cmd.stdout));
+
+    return output.spec.ports.map(p => p.port);
+}
+
 function portForward({ namespace, service, localPort, targetPort }) {
     return spawn(KUBECTL, `port-forward -n=${namespace} svc/${service} ${localPort}:${targetPort}`.split(' '));
 }
 
-module.exports = { getKubeVersion, getNamespaces, getServices, portForward };
+module.exports = { getKubeVersion, getNamespaces, getServices, getPorts, portForward };

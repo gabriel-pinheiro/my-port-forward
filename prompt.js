@@ -22,12 +22,27 @@ async function promptService(services) {
     return service;
 }
 
-async function promptPort(message) {
+async function promptTargetPort(ports) {
+    const { port } = await inquirer.prompt([{
+        type: 'list',
+        name: 'port',
+        message: 'Which ' + 'port of the service'.yellow + ' would you like to forward?',
+        choices: ports,
+    }]);
+
+    return port;
+}
+
+async function promptLocalPort(targetPort) {
     const { port } = await inquirer.prompt([{
         type: 'input',
         name: 'port',
-        message,
+        message: `To which ${'local port'.yellow} would you like to forward to service port ${targetPort.toString().yellow}?`,
         validate: function (value) {
+            if(!value) {
+                return 'Cannot be empty';
+            }
+
             if(isNaN(value)) {
                 return 'Must be a number';
             }
@@ -53,4 +68,4 @@ async function promptNext() {
     return bool;
 }
 
-module.exports = { promptNamespace, promptService, promptPort, promptNext };
+module.exports = { promptNamespace, promptService, promptTargetPort, promptLocalPort, promptNext };

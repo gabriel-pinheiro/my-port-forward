@@ -1,9 +1,9 @@
 require('colors');
-const { getKubeVersion, getNamespaces, getServices } = require('./kube');
+const { getKubeVersion, getNamespaces, getServices, getPorts } = require('./kube');
 const { Command } = require('commander');
 const ora = require('ora');
 const pkg = require('./package.json');
-const { promptNamespace, promptService, promptPort, promptNext } = require('./prompt');
+const { promptNamespace, promptService, promptNext, promptLocalPort, promptTargetPort } = require('./prompt');
 const { setGroups, getGroups } = require('./fs');
 const { exitWithError } = require('./utils');
 const { PortForward } = require('./port-forward');
@@ -15,16 +15,22 @@ async function init() {
 
     program.command('create <name>').description('Creates a port-forward group').action(async (name) => {
         let forwards = [];
+        const namespaces = await getNamespaces();
 
         do {
-            const namespaces = await getNamespaces();
             const namespace = await promptNamespace(namespaces);
-
             const services = await getServices(namespace);
-            const service = await promptService(services);
+            if(services.length === 0) {
+                console.log('Oops, there are no services in this namespace'.yellow);
+                namespaces.splice(namespaces.indexOf(namespace), 1);
+                continue;
+            }
 
-            const targetPort = await promptPort('Which ' + 'port of the service'.yellow + ' would you like to forward?');
-            const localPort = await promptPort('To which ' + 'local port'.yellow + ' would you like to forward?');
+            const service = await promptService(services);
+            const servicePorts = await getPorts(namespace, service);
+
+            const targetPort = servicePorts.length === 1 ? servicePorts[0] : await promptTargetPort(servicePorts);
+            const localPort = await promptLocalPort(targetPort);
 
             forwards.push({ namespace, service, localPort, targetPort });
         } while(await promptNext());
