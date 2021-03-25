@@ -7,13 +7,16 @@ const KUBE_TO_EVENT = {
 };
 
 class PortForward extends EventEmitter {
-    constructor({ namespace, service, localPort, targetPort }) {
+    constructor({ namespace, service, localPort, targetPort }, { timeout = 10 } = {}) {
         super();
 
         this.namespace = namespace;
         this.service = service;
         this.localPort = localPort;
         this.targetPort = targetPort;
+
+        this.timeout = timeout;
+
         this.isListening = false;
         this.process = null;
     }
@@ -23,10 +26,10 @@ class PortForward extends EventEmitter {
             this.process = portForward(this);
             this.process.on('error',       () => this.emit('exit'));
             this.process.on('exit',        () => this.emit('exit'));
-            this.process.stderr.on('data', () => this.emit('exit'));
-            this.process.stdout.on('data', d => this._processLog(d.toString('utf8')));
+            this.process.stderr.on('data',  e => this.emit('exit', e.toString()));
+            this.process.stdout.on('data',  d => this._processLog(d.toString('utf8')));
 
-            const timeout =  setTimeout(() => this.emit('exit'), 10000);
+            const timeout =  setTimeout(() => this.emit('exit', 'Port-forward took too long to stablish.\nMake sure that your service has available endpoints (kubectl get ep) or use the option --timeout <seconds> to increase the timeout.'), this.timeout * 1e3);
             this.once('exit', () => {
                 this.isListening = false;
                 rej();
@@ -48,8 +51,11 @@ class PortForward extends EventEmitter {
             console.log(`\r${'✔'.green} Forwarding ${this.localPort} to ${this.namespace}/${this.service}:${this.targetPort}`.padEnd(pad, ' '));
         });
 
-        this.on('exit', () => {
-            console.error(`\r${'✖'.red} Failed to forward ${this.localPort} to ${this.namespace}/${this.service}:${this.targetPort}`.padEnd(pad, ' '));
+        this.on('exit', m => {
+            const baseMessage = `\r${'✖'.red} Failed to forward ${this.localPort} to ${this.namespace}/${this.service}:${this.targetPort}`;
+            const message = baseMessage + (m ? ': ' + m : '');
+
+            console.error(message.padEnd(pad, ' '));
         });
 
         this.on('connection', () => {
