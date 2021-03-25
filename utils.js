@@ -13,4 +13,21 @@ function exitWithError(error) {
     process.exit(1);
 }
 
-module.exports = { streamToString, exitWithError };
+const logs = [];
+const log = (...cols) => logs.push(cols);
+function printLogs() {
+    if(logs.length === 0) {
+        return;
+    }
+
+    const maxSizes = new Array(logs[0].length).fill()
+        .map((_, i) => logs.map(l => l[i].length).reduce((acc, v) => Math.max(acc, v), -Infinity));
+
+    const text = logs.map(line =>
+        line.map((col, i) => col.padEnd(maxSizes[i], ' ')).join('\t'))
+        .join('\n');
+    
+    console.log(text);
+}
+
+module.exports = { streamToString, exitWithError, log, printLogs };

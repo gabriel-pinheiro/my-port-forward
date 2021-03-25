@@ -5,13 +5,42 @@ const ora = require('ora');
 const pkg = require('./package.json');
 const { promptNamespace, promptService, promptNext, promptLocalPort, promptTargetPort } = require('./prompt');
 const { setGroups, getGroups } = require('./fs');
-const { exitWithError } = require('./utils');
+const { exitWithError, log, printLogs } = require('./utils');
 const { PortForward } = require('./port-forward');
 
 async function init() {
     const KUBE_VERSION = await getKubeVersion();
     const program = new Command()
         .version(`mpf/${pkg.version} kubectl/${KUBE_VERSION} node/${process.version}`);
+
+    program.command('list').description('Lists all port-forward groups').action(async () => {
+        const groups = await getGroups();
+        if(!groups) {
+            exitWithError(`Oops, there are no groups, use 'mpf create <name>' to start`);
+        }
+
+        log('NAME    ', 'PORTS')
+        Object.entries(groups).forEach(([name, forwards]) =>
+            log(name, forwards.map(f => f.localPort).join(', ')));
+
+        printLogs();
+    });
+
+    program.command('get <name>').description('Lists all port-forwards of a group').action(async (name) => {
+        const groups = await getGroups();
+        if(!groups) {
+            exitWithError(`Oops, there are no groups, use 'mpf create <name>' to start`);
+        }
+
+        const group = groups[name];
+        if(!group) {
+            exitWithError(`Oops, the group ${name.red} doesn't exist`);
+        }
+
+        log('LOCAL PORT  ', 'NAMESPACE  ', 'SERVICE  ', 'REMOTE PORT');
+        group.forEach(f => log(f.localPort.toString(), f.namespace, f.service, f.targetPort.toString()));
+        printLogs();
+    });
 
     program.command('create <name>').description('Creates a port-forward group').action(async (name) => {
         let forwards = [];
