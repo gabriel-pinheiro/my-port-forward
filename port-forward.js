@@ -25,14 +25,19 @@ class PortForward extends EventEmitter {
             this.process.on('exit',        () => this.emit('exit'));
             this.process.stderr.on('data', () => this.emit('exit'));
             this.process.stdout.on('data', d => this._processLog(d.toString('utf8')));
+
+            const timeout =  setTimeout(() => this.emit('exit'), 10000);
             this.once('exit', () => {
                 this.isListening = false;
                 rej();
+                clearTimeout(timeout);
             });
             this.once('listen', () => {
                 this.isListening = true;
                 res();
+                clearTimeout(timeout);
             });
+
         });
     }
 
