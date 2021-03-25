@@ -14,7 +14,7 @@ async function init() {
         .version(`mpf/${pkg.version} kubectl/${KUBE_VERSION} node/${process.version}`);
 
     program.command('list').description('Lists all port-forward groups').action(async () => {
-        const groups = await getGroups();
+        const groups = await getGroups().catch(() => {});
         if(!groups) {
             exitWithError(`Oops, there are no groups, use 'mpf create <name>' to start`);
         }
@@ -27,7 +27,7 @@ async function init() {
     });
 
     program.command('get <name>').description('Lists all port-forwards of a group').action(async (name) => {
-        const groups = await getGroups();
+        const groups = await getGroups().catch(() => {});
         if(!groups) {
             exitWithError(`Oops, there are no groups, use 'mpf create <name>' to start`);
         }
@@ -40,6 +40,20 @@ async function init() {
         log('LOCAL PORT  ', 'NAMESPACE  ', 'SERVICE  ', 'REMOTE PORT');
         group.forEach(f => log(f.localPort.toString(), f.namespace, f.service, f.targetPort.toString()));
         printLogs();
+    });
+
+    program.command('delete <name>').description('Deletes a port-forward group').action(async (name) => {
+        const groups = await getGroups().catch(() => {});
+        if(!groups) {
+            exitWithError(`Oops, there are no groups, use 'mpf create <name>' to start`);
+        }
+
+        if(!groups[name]) {
+            exitWithError(`Oops, the group ${name.red} doesn't exist`);
+        }
+
+        delete groups[name];
+        await setGroups(groups);
     });
 
     program.command('create <name>').description('Creates a port-forward group').action(async (name) => {

@@ -1,6 +1,6 @@
 {
   "name": "my-port-forward",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Create Kubernetes port-forward groups and run them at once",
   "main": "index.js",
   "bin": {
