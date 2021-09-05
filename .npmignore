@@ -1,0 +1,4 @@
+.gitignore
+.npmignore
+dist
+node_modules
