@@ -1,8 +1,10 @@
+'use strict';
+
 require('colors');
 const { getKubeVersion, getNamespaces, getServices, getPorts } = require('./kube');
 const { Command } = require('commander');
 const ora = require('ora');
-const pkg = require('./package.json');
+const pkg = require('../package.json');
 const { promptNamespace, promptService, promptNext, promptLocalPort, promptTargetPort } = require('./prompt');
 const { setGroups, getGroups } = require('./fs');
 const { exitWithError, log, printLogs } = require('./utils');

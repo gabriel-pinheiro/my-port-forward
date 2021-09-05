@@ -1,8 +1,8 @@
 {
   "name": "my-port-forward",
   "version": "0.3.0",
-  "description": "Create Kubernetes port-forward groups and run them at once",
-  "main": "index.js",
+  "description": "Create Kubernetes port-forward groups and start them with a single command",
+  "main": "src/index.js",
   "bin": {
     "mpf": "bin/mpf.js"
   },
@@ -13,8 +13,8 @@
   "license": "Apache-2.0",
   "dependencies": {
     "colors": "^1.4.0",
-    "commander": "^7.2.0",
-    "inquirer": "^8.0.0",
-    "ora": "^5.4.0"
+    "commander": "^8.1.0",
+    "inquirer": "^8.1.2",
+    "ora": "^5.4.1"
   }
 }
