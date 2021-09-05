@@ -1,4 +1,9 @@
 'use strict';
+const semver = require('semver');
+if(!semver.satisfies(process.version, '>=12')) {
+    console.error(`Your NodeJS version (${process.version}) is too old for mpf :(\nUse at least NodeJS 12`);
+    process.exit(1);
+}
 
 require('colors');
 const { getKubeVersion, getNamespaces, getServices, getPorts } = require('./kube');
