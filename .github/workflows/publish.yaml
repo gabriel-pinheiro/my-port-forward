@@ -13,4 +13,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and publish
-      run: docker build --build-arg CT_TOKEN=${{ secrets.CT_TOKEN }} -f publish.Dockerfile --no-cache
+      run: docker build --build-arg CT_TOKEN=${{ secrets.CT_TOKEN }} -f publish.Dockerfile --no-cache .
