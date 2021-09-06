@@ -2,3 +2,6 @@
 .npmignore
 dist
 node_modules
+install.sh
+publish.Dockerfile
+.github
