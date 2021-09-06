@@ -1,0 +1,15 @@
+name: Build and publish
+
+on:
+  push:
+    tags:
+      - 1.*
+      - 2.*
+
+jobs:
+  publish-api:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and publish
+      run: docker build --build-arg CT_TOKEN=${{ secrets.CT_TOKEN }} -f publish.Dockerfile --no-cache
