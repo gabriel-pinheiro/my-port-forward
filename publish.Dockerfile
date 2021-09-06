@@ -20,3 +20,4 @@ RUN echo $CT_TOKEN | ct cdn login
 RUN ct cdn create object mpf dist/my-port-forward-linux --name mpf-linux
 RUN ct cdn create object mpf dist/my-port-forward-macos --name mpf-macos
 RUN ct cdn create object mpf dist/my-port-forward-win.exe --name mpf-win.exe
+RUN ct cdn create object mpf install.sh
